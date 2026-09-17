@@ -34,3 +34,11 @@ class Student:
                 and self.course == other.course
                 and self.age == other.age
                 and self.average_grade == other.average_grade)
+
+
+def make_student(name: str = "Иванов И.И.",
+                 group: str = "PZ-21",
+                 course: int = 2,
+                 age: int = 18,
+                 grade: float = 4.0) -> Student:
+    return Student(name, group, course, age, grade)

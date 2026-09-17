@@ -1,15 +1,7 @@
 import pytest
 
 from src.heap import Heap
-from src.models.student import Student
-
-
-def make_student(name: str = "Иванов И.И.",
-                 group: str = "PZ-21",
-                 course: int = 2,
-                 age: int = 18,
-                 grade: float = 4.0) -> Student:
-    return Student(name, group, course, age, grade)
+from src.models.student import Student, make_student
 
 
 class TestBenchmarkPush:
