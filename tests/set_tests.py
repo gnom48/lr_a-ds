@@ -46,7 +46,7 @@ class TestInitLen:
         assert len(empty) == 5
 
 
-# ---------- add / уникальность ----------
+# ---------- add ----------
 
 class TestAdd:
     def test_add_new(self, empty: Set[int]) -> None:
@@ -73,7 +73,7 @@ class TestAdd:
         assert "b" in s
 
 
-# ---------- __contains__ (линейный поиск) ----------
+# ---------- __contains__ ----------
 
 class TestContainsLinear:
     def test_present(self, filled: Set[int]) -> None:
@@ -209,7 +209,7 @@ class TestIntersect:
         assert set(other) == before_b
 
 
-# ---------- difference / symmetric_difference ----------
+# ---------- difference  ----------
 
 class TestDifference:
     def test_difference(self, filled: Set[int], other: Set[int]) -> None:

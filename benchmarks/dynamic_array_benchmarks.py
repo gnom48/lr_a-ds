@@ -17,12 +17,12 @@ def make_array(n: int, capacity: int = 10) -> DynamicArray[int]:
 
 class TestBenchmarkAppend:
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_append(benchmark, n: int) -> None:
+    def test_bench_append(self, benchmark, n: int) -> None:
         """Амортизированное добавление в конец."""
         benchmark(lambda: [DynamicArray().append(i) for i in range(n)])
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_append_preallocated(benchmark, n: int) -> None:
+    def test_bench_append_preallocated(self, benchmark, n: int) -> None:
         """Append в массив с заранее большой ёмкостью — без ресайзов."""
         def run() -> None:
             arr: DynamicArray[int] = DynamicArray(n)
@@ -33,7 +33,7 @@ class TestBenchmarkAppend:
 
 class TestBenchmarkInsert:
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_insert_at_start(benchmark, n: int) -> None:
+    def test_bench_insert_at_start(self, benchmark, n: int) -> None:
         """Вставка в начало — O(n) на каждый insert → O(n²) суммарно."""
         def run() -> None:
             arr: DynamicArray[int] = DynamicArray(n + 1)
@@ -42,7 +42,7 @@ class TestBenchmarkInsert:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_insert_at_end(benchmark, n: int) -> None:
+    def test_bench_insert_at_end(self, benchmark, n: int) -> None:
         """Вставка в конец через insert — фактически append."""
         def run() -> None:
             arr: DynamicArray[int] = DynamicArray(n)
@@ -51,7 +51,7 @@ class TestBenchmarkInsert:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_insert_middle(benchmark, n: int) -> None:
+    def test_bench_insert_middle(self, benchmark, n: int) -> None:
         """Вставка в середину."""
         def run() -> None:
             arr: DynamicArray[int] = DynamicArray(n + 1)
@@ -62,7 +62,7 @@ class TestBenchmarkInsert:
 
 class TestBenchmarkPop:
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_pop_from_end(benchmark, n: int) -> None:
+    def test_bench_pop_from_end(self, benchmark, n: int) -> None:
         """Удаление с конца — O(1)."""
         def run() -> None:
             arr = make_array(n)
@@ -71,7 +71,7 @@ class TestBenchmarkPop:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_pop_from_start(benchmark, n: int) -> None:
+    def test_bench_pop_from_start(self, benchmark, n: int) -> None:
         """Удаление из начала — O(n) каждый раз."""
         def run() -> None:
             arr = make_array(n)
@@ -80,7 +80,7 @@ class TestBenchmarkPop:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_delitem_middle(benchmark, n: int) -> None:
+    def test_bench_delitem_middle(self, benchmark, n: int) -> None:
         """Удаление из середины через del."""
         def run() -> None:
             arr = make_array(n)

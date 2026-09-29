@@ -54,26 +54,10 @@ class DynamicArray[T](MutableSequence[T]):
                 f"Индекс {index} выходит за границы массива (размер: {self._size})")
 
     def __getitem__(self, index: int) -> T:
-        """
-        Получение элемента по индексу.
-
-        Args:
-            index: Индекс элемента
-
-        Returns:
-            Элемент массива
-        """
         self._check_index(index)
         return self._data[index]
 
     def __setitem__(self, index: int, value: T) -> None:
-        """
-        Установка значения элемента по индексу.
-
-        Args:
-            index: Индекс элемента
-            value: Новое значение
-        """
         self._check_index(index)
         # FIXME: оказывается T это всего лишь строка-маркер типа, а не тип
         # if not isinstance(value, T):
@@ -81,12 +65,6 @@ class DynamicArray[T](MutableSequence[T]):
         self._data[index] = value
 
     def __delitem__(self, index: int) -> None:
-        """
-        Удаление элемента по индексу.
-
-        Args:
-            index: Индекс элемента для удаления
-        """
         self._check_index(index)
 
         # Сдвиг
@@ -101,21 +79,9 @@ class DynamicArray[T](MutableSequence[T]):
             self._resize(max(self._capacity // 2, INITIAL_CAPACITY))
 
     def __len__(self) -> int:
-        """
-        Возвращает количество элементов в массиве.
-
-        Returns:
-            Размер массива
-        """
         return self._size
 
     def __iter__(self) -> Iterator[T]:
-        """
-        Итератор по элементам массива.
-
-        Yields:
-            Элементы массива
-        """
         for i in range(self._size):
             yield self._data[i]
 
@@ -172,34 +138,13 @@ class DynamicArray[T](MutableSequence[T]):
         return False
 
     def __repr__(self) -> str:
-        """
-        Строковое представление массива.
-
-        Returns:
-            Строка с элементами массива
-        """
         elements = [str(self._data[i]) for i in range(self._size)]
         return f"DynamicArray([{', '.join(elements)}])"
 
     def __str__(self) -> str:
-        """
-        Пользовательское строковое представление.
-
-        Returns:
-            Строка с элементами массива
-        """
         return self.__repr__()
 
     def __eq__(self, other: Any) -> bool:
-        """
-        Сравнение массивов на равенство.
-
-        Args:
-            other: Другой объект для сравнения
-
-        Returns:
-            True, если массивы равны
-        """
         if not isinstance(other, DynamicArray):
             return False
 
@@ -268,11 +213,11 @@ class DynamicArray[T](MutableSequence[T]):
 
         value = self._data[index]
         del self[index]
-        return value  # type: ignore
+        return value
 
     def reverse(self) -> None:
         """
-        Изменение порядка элементов на противоположный.
+        Перевернуть массив.
         """
         left, right = 0, self._size - 1
 

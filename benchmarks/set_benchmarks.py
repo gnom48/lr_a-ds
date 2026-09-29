@@ -12,8 +12,8 @@ def make_set(n: int, start: int = 0) -> Set[int]:
 
 class TestBenchmarkAdd:
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_add_unique(benchmark, n: int) -> None:
-        """add уникальных значений — O(n²) суммарно из-за линейного поиска."""
+    def test_bench_add_unique(self, benchmark, n: int) -> None:
+        """add уникальных значений — O(n^2) суммарно из-за линейного поиска."""
         def run() -> None:
             s: Set[int] = Set()
             for i in range(n):
@@ -21,7 +21,7 @@ class TestBenchmarkAdd:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_add_duplicate(benchmark, n: int) -> None:
+    def test_bench_add_duplicate(self, benchmark, n: int) -> None:
         """add дубликатов — каждый раз линейный поиск до конца, O(n) на операцию."""
         s = make_set(n)
 
@@ -33,7 +33,7 @@ class TestBenchmarkAdd:
 
 class TestBenchmarkContains:
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_contains_linear(benchmark, n: int) -> None:
+    def test_bench_contains_linear(self, benchmark, n: int) -> None:
         """Линейный поиск (in) — O(n) на запрос."""
         s = make_set(n)
 
@@ -43,7 +43,7 @@ class TestBenchmarkContains:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_contains_binary(benchmark, n: int) -> None:
+    def test_bench_contains_binary(self, benchmark, n: int) -> None:
         """Бинарный поиск — O(log n) на запрос, но требует отсортированности."""
         s = make_set(n)
         s._data.sort()
@@ -57,7 +57,7 @@ class TestBenchmarkContains:
 
 class TestBenchmarkRemove:
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_remove_first(benchmark, n: int) -> None:
+    def test_bench_remove_first(self, benchmark, n: int) -> None:
         """remove первого элемента — линейный поиск + сдвиг."""
         def run() -> None:
             local = make_set(n)
@@ -65,7 +65,7 @@ class TestBenchmarkRemove:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_remove_last(benchmark, n: int) -> None:
+    def test_bench_remove_last(self, benchmark, n: int) -> None:
         """remove последнего элемента — линейный поиск до конца без сдвига."""
         def run() -> None:
             local = make_set(n)
@@ -73,7 +73,7 @@ class TestBenchmarkRemove:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_pop(benchmark, n: int) -> None:
+    def test_bench_pop(self, benchmark, n: int) -> None:
         """pop — O(1), удаляет с конца."""
         def run() -> None:
             local = make_set(n)
@@ -83,8 +83,8 @@ class TestBenchmarkRemove:
 
 class TestBenchmarkUnion:
     @pytest.mark.parametrize("n", [100, 500, 1_000])
-    def test_bench_union(benchmark, n: int) -> None:
-        """union двух множеств размера n — O((2n)²) из-за add."""
+    def test_bench_union(self, benchmark, n: int) -> None:
+        """union двух множеств размера n — O((2n)^2) из-за add."""
         a = make_set(n, start=0)
         b = make_set(n, start=n // 2)  # половина пересекается
 
@@ -93,8 +93,8 @@ class TestBenchmarkUnion:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 500, 1_000])
-    def test_bench_union_disjoint(benchmark, n: int) -> None:
-        """union непересекающихся — те же O((2n)²), но add всегда добавляет."""
+    def test_bench_union_disjoint(self, benchmark, n: int) -> None:
+        """union непересекающихся — те же O((2n)^2), но add всегда добавляет."""
         a = make_set(n, start=0)
         b = make_set(n, start=n)
 
@@ -105,8 +105,8 @@ class TestBenchmarkUnion:
 
 class TestBenchmarkIntersect:
     @pytest.mark.parametrize("n", [100, 500, 1_000])
-    def test_bench_intersect_half(benchmark, n: int) -> None:
-        """intersect при пересечении в половину — O(n²)."""
+    def test_bench_intersect_half(self, benchmark, n: int) -> None:
+        """intersect при пересечении в половину — O(n^2)."""
         a = make_set(n, start=0)
         b = make_set(n, start=n // 2)
 
@@ -115,7 +115,7 @@ class TestBenchmarkIntersect:
         benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 500, 1_000])
-    def test_bench_intersect_empty(benchmark, n: int) -> None:
+    def test_bench_intersect_empty(self, benchmark, n: int) -> None:
         """intersect непересекающихся — итерируемся по меньшему, ищем в большем."""
         a = make_set(n, start=0)
         b = make_set(n, start=n)

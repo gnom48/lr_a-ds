@@ -1,4 +1,4 @@
-from typing import Iterator, Optional, Any
+from typing import Iterator, Any
 from collections.abc import MutableSet
 
 from src.dynamic_array.dynamic_array import DynamicArray
@@ -13,10 +13,6 @@ class Set[T](MutableSet[T]):
         self._data: DynamicArray[T] = DynamicArray(initial_capacity)
         # self._data: list[T] = [None * initial_capacity]
         self._sorted: bool = True
-
-    def _invalidate_sort(self) -> None:
-        """Помечает массив как неотсортированный после мутации."""
-        self._sorted = False
 
     def _check_index(self, index: int) -> None:
         if not isinstance(index, int):
@@ -61,7 +57,7 @@ class Set[T](MutableSet[T]):
         """Добавляет элемент, если его ещё нет"""
         if value not in self._data:
             self._data.append(value)
-            self._invalidate_sort()
+            self._sorted = False
 
     def remove(self, value: T) -> None:
         """
