@@ -1,11 +1,6 @@
 import pytest
 
 from src.dynamic_array import DynamicArray
-# from dynamic_array.true_dynamic_array import DynamicArray
-
-"""
-Как показывают бенчмарки: list реализация в разы быстрее ctype.Array реализации - факт!
-"""
 
 
 def make_array(n: int, capacity: int = 10) -> DynamicArray[int]:
@@ -15,11 +10,24 @@ def make_array(n: int, capacity: int = 10) -> DynamicArray[int]:
     return arr
 
 
+def make_sorted_array(n: int) -> DynamicArray[int]:
+    arr: DynamicArray[int] = DynamicArray(n)
+    for i in range(n):
+        arr.append(i)
+    return arr  # уже отсортирован, т.к. добавляли по возрастанию
+
+
+# ---------- append ----------
+
 class TestBenchmarkAppend:
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
     def test_bench_append(self, benchmark, n: int) -> None:
-        """Амортизированное добавление в конец."""
-        benchmark(lambda: [DynamicArray().append(i) for i in range(n)])
+        """Амортизированное добавление в конец с ресайзами."""
+        def run() -> None:
+            arr: DynamicArray[int] = DynamicArray()
+            for i in range(n):
+                arr.append(i)
+        benchmark(run)
 
     @pytest.mark.parametrize("n", [100, 1_000, 10_000])
     def test_bench_append_preallocated(self, benchmark, n: int) -> None:
@@ -31,80 +39,79 @@ class TestBenchmarkAppend:
         benchmark(run)
 
 
-class TestBenchmarkInsert:
-    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_insert_at_start(self, benchmark, n: int) -> None:
-        """Вставка в начало — O(n) на каждый insert → O(n²) суммарно."""
-        def run() -> None:
-            arr: DynamicArray[int] = DynamicArray(n + 1)
-            for i in range(n):
-                arr.insert(0, i)
-        benchmark(run)
-
-    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_insert_at_end(self, benchmark, n: int) -> None:
-        """Вставка в конец через insert — фактически append."""
-        def run() -> None:
-            arr: DynamicArray[int] = DynamicArray(n)
-            for i in range(n):
-                arr.insert(len(arr), i)
-        benchmark(run)
-
-    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_insert_middle(self, benchmark, n: int) -> None:
-        """Вставка в середину."""
-        def run() -> None:
-            arr: DynamicArray[int] = DynamicArray(n + 1)
-            for i in range(n):
-                arr.insert(len(arr) // 2, i)
-        benchmark(run)
-
-
-class TestBenchmarkPop:
-    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_pop_from_end(self, benchmark, n: int) -> None:
-        """Удаление с конца — O(1)."""
-        def run() -> None:
-            arr = make_array(n)
-            for _ in range(n):
-                arr.pop()
-        benchmark(run)
-
-    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_pop_from_start(self, benchmark, n: int) -> None:
-        """Удаление из начала — O(n) каждый раз."""
-        def run() -> None:
-            arr = make_array(n)
-            for _ in range(n):
-                arr.pop(0)
-        benchmark(run)
-
-    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
-    def test_bench_delitem_middle(self, benchmark, n: int) -> None:
-        """Удаление из середины через del."""
-        def run() -> None:
-            arr = make_array(n)
-            for _ in range(n):
-                del arr[len(arr) // 2]
-        benchmark(run)
-
-
 class TestBenchmarkResize:
-    def test_bench_growth_amortized(benchmark) -> None:
-        """Рост с 10 до 100_000: сколько ресайзов и время."""
+    def test_bench_growth_amortized(self, benchmark) -> None:
+        """Рост с 10 до 100_000: амортизированная стоимость append с ресайзами."""
         def run() -> None:
             arr: DynamicArray[int] = DynamicArray(10)
             for i in range(100_000):
                 arr.append(i)
         benchmark(run)
 
-    def test_bench_shrink_amortized(benchmark) -> None:
-        """Сжатие: удаление 90_000 элементов pop'ом с конца."""
-        arr = make_array(100_000, capacity=100_000)
+
+# ---------- Проверки вхождения ----------
+
+class TestBenchmarkContainsLinear:
+    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
+    def test_bench_contains_linear(self, benchmark, n: int) -> None:
+        """Линейный поиск через `in` — O(n) на запрос."""
+        arr = make_array(n)
 
         def run() -> None:
-            # копируем, чтобы не мутировать между запусками
-            local = make_array(100_000, capacity=100_000)
-            for _ in range(90_000):
-                local.pop()
+            for i in range(n):
+                _ = i in arr
+        benchmark(run)
+
+    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
+    def test_bench_contains_linear_missing(self, benchmark, n: int) -> None:
+        """Линейный поиск отсутствующего элемента — всегда O(n), без раннего выхода."""
+        arr = make_array(n)
+
+        def run() -> None:
+            for i in range(n):
+                _ = (n + i) in arr
+        benchmark(run)
+
+
+class TestBenchmarkContainsBinary:
+    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
+    def test_bench_contains_binary(self, benchmark, n: int) -> None:
+        """Бинарный поиск — O(log n) на запрос (массив отсортирован)."""
+        arr = make_sorted_array(n)
+
+        def run() -> None:
+            for i in range(n):
+                _ = arr.contains_binary_search(i)
+        benchmark(run)
+
+    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
+    def test_bench_contains_binary_missing(self, benchmark, n: int) -> None:
+        """Бинарный поиск отсутствующего элемента — O(log n)."""
+        arr = make_sorted_array(n)
+
+        def run() -> None:
+            for i in range(n):
+                _ = arr.contains_binary_search(n + i)
+        benchmark(run)
+
+
+# ---------- sum / average ----------
+
+class TestBenchmarkSumAverage:
+    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
+    def test_bench_sum(self, benchmark, n: int) -> None:
+        """Сумма всех элементов — O(n)."""
+        arr = make_array(n)
+
+        def run() -> None:
+            _ = arr.sum()
+        benchmark(run)
+
+    @pytest.mark.parametrize("n", [100, 1_000, 10_000])
+    def test_bench_average(self, benchmark, n: int) -> None:
+        """Среднее арифметическое — O(n)."""
+        arr = make_array(n)
+
+        def run() -> None:
+            _ = arr.average()
         benchmark(run)
