@@ -40,9 +40,9 @@ class Set[T](MutableSet[T]):
         Проверка вхождения через бинарный поиск.
         Требует, чтобы множество было отсортировано.
         """
-        # if not self._sorted:
-        #     self._data.sort()
-        #     self._sorted = True
+        if not self._sorted:
+            self._data.sort()
+            self._sorted = True
         return self._data.contains_binary_search(item)
 
     def __getitem__(self, index: int) -> T:
