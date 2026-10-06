@@ -5,20 +5,17 @@ import os
 
 from src.prefix_tree import PrefixTree
 
-storage = PrefixTree()
-storage.add("python")
-storage.add("prefix")
-storage.add("python prefix")
-storage.add("pypl")
-storage.add("arm")
-storage.add("axe")
 
-GRAY = "\033[90m"
-RESET = "\033[0m"
-
-
-def main():
+def main2():
+    """крутое с реальным автодополнением"""
     os.system('')
+
+    storage = PrefixTree()
+    for w in ["python", "prefix", "python prefix", "pypl", "arm", "axe"]:
+        storage.add(w)
+
+    GRAY = "\033[90m"
+    RESET = "\033[0m"
 
     print("Начните вводить текст.")
     print("Используйте стрелки ВВЕРХ/ВНИЗ для выбора вариантов, а ENTER чтобы подтвердить.")
@@ -93,6 +90,40 @@ def main():
                 suggestion_index = 0  # Сбрасываем выбор при вводе новой буквы
         except UnicodeDecodeError:
             pass
+
+
+def main():
+    """Тупое просто с вводом-выводом"""
+
+    storage = PrefixTree()
+    for w in ["python", "prefix", "python prefix", "pypl", "arm", "axe"]:
+        storage.add(w)
+
+    while True:
+        prefix = input("\nВведите начало слова (или 'exit'): ").strip()
+        if prefix.lower() == "exit":
+            break
+        if not prefix:
+            continue
+
+        suggestions = storage.starts_with(prefix)
+        if suggestions:
+            print("Варианты автодополнения:")
+            for i, s in enumerate(suggestions, 1):
+                print(f"  {i}. {s}")
+            print("  0. None (ввести слово полностью)")
+
+            choice = input("Выберите номер (Enter — None): ").strip()
+            if choice.isdigit() and 1 <= int(choice) <= len(suggestions):
+                word = suggestions[int(choice) - 1]
+                print(f"Выбрано: {word}")
+                continue
+
+        # None или нет вариантов — вводим полностью
+        word = input("Введите слово полностью: ").strip()
+        if word:
+            storage.add(word)
+            print(f"Слово '{word}' добавлено в дерево.")
 
 
 if __name__ == "__main__":
