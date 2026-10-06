@@ -33,7 +33,6 @@ class Heap[S: Student]:
             parent = (i - 1) // 2
 
     def __down(self, i: int) -> None:
-        """Опускать ниже пока меньше родителя"""
         n = len(self._data)
         while True:
             l_child, r_child = 2 * i + 1, 2 * i + 2
@@ -42,7 +41,7 @@ class Heap[S: Student]:
                 gr = l_child
             if r_child < n and self._data[r_child] > self._data[gr]:
                 gr = r_child
-            if gr >= n:
+            if gr == i:
                 break
             self._data[i], self._data[gr] = self._data[gr], self._data[i]
             i = gr
@@ -62,28 +61,27 @@ class Heap[S: Student]:
         """
         Проверка вхождения по полям
         """
-        return any(s == student for s in self._heap)
+        return any(s == student for s in self._data)
 
     def contains_by_key(self, average_grade: float, eps: float = 1e-9) -> bool:
         """
         Проверка вхождения по ключу
         """
-        return any(abs(s.average_grade - average_grade) < eps for s in self._heap)
+        return any(abs(s.average_grade - average_grade) < eps for s in self._data)
 
     # ---------- Сериализация ----------
     def save(self, path: str) -> None:
-        """Сохранить кучу в файл"""
         with open(path, "w", encoding="utf-8") as f:
-            json.dump(self._data, f, ensure_ascii=False, indent=2)
+            json.dump({"items": [s.to_dict() for s in self._data]},
+                      f, ensure_ascii=False, indent=2)
 
     def load(self, path: str) -> None:
-        """Загрузить кучу из файла"""
         with open(path, "r", encoding="utf-8") as f:
             data = json.load(f)
         students = [Student.from_dict(d) for d in data["items"]]
-        self.__build(students)
+        self.build(students)
 
-    def __build(self, students: list[S]) -> None:
+    def build(self, students: list[S]) -> None:
         """Построить кучу из готового списка"""
         self._data = list(students)
         for i in range(len(self._data) // 2 - 1, -1, -1):

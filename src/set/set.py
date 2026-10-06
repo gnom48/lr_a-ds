@@ -4,6 +4,7 @@ from collections.abc import MutableSet
 from src.dynamic_array.dynamic_array import DynamicArray
 
 
+# TODO: переделать: главное что set не должен давать доступ по индексу
 class Set[T](MutableSet[T]):
     """
     Множество на основе DynamicArray

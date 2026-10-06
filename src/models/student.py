@@ -23,7 +23,7 @@ class Student:
     def __lt__(self, other: "Student") -> bool:
         return self.average_grade < other.average_grade
 
-    def __bg__(self, other: "Student") -> bool:
+    def __gr__(self, other: "Student") -> bool:
         return self.average_grade > other.average_grade
 
     def __eq__(self, other: object) -> bool:
@@ -33,12 +33,12 @@ class Student:
                 and self.group_number == other.group_number
                 and self.course == other.course
                 and self.age == other.age
-                and self.average_grade == other.average_grade)
+                and abs(self.average_grade - other.average_grade) < 1e-9)
 
 
 def make_student(name: str = "Иванов И.И.",
-                 group: str = "PZ-21",
+                 group: str = "4517",
                  course: int = 2,
-                 age: int = 18,
+                 age: int = 21,
                  grade: float = 4.0) -> Student:
     return Student(name, group, course, age, grade)
