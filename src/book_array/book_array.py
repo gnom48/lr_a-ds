@@ -139,3 +139,71 @@ class BookArray:
             self.heap_sort(self._items, key=lambda b: b.pages)
         ))
     # endregion
+
+    # region jump_search по author
+    def sort_by_author(self) -> None:
+        """Сортировка слиянием по возрастанию поля author (готовит данные под jump_search)."""
+        self._items = self.merge_sort(self._items, key=lambda b: b.author)
+
+    def _is_sorted_asc(self, key: Callable[[Book], Any]) -> bool:
+        return all(key(self._items[i]) <= key(self._items[i + 1])
+                   for i in range(len(self._items) - 1))
+
+    def jump_search_by_author(self, author: str) -> int:
+        """
+        Скачкообразный поиск по полю author.
+        Возвращает индекс первого совпадения. Если элемента нет — -1.
+        Бросает ValueError, если массив не отсортирован по author.
+        """
+        if not self._is_sorted_asc(lambda b: b.author):
+            raise ValueError("Массив не отсортирован по полю 'author'")
+
+        n = len(self._items)
+        if n == 0:
+            return -1
+
+        step = int(n ** 0.5)
+        prev = 0
+        while prev < n and self._items[min(step, n) - 1].author < author:
+            prev = step
+            step += int(n ** 0.5)
+            if prev >= n:
+                return -1
+
+        while prev < min(step, n) and self._items[prev].author < author:
+            prev += 1
+
+        if prev < n and self._items[prev].author == author:
+            return prev
+        return -1
+    # endregion
+
+    # region binary_search по publisher
+    def sort_by_publisher_asc(self) -> None:
+        """Сортировка слиянием по возрастанию поля publisher (готовит данные под binary_search)."""
+        self._items = self.merge_sort(self._items, key=lambda b: b.publisher)
+
+    def binary_search_by_publisher(self, publisher: str) -> int:
+        """
+        Бинарный поиск по полю publisher.
+        Возвращает индекс первого совпадения. Если элемента нет — -1.
+        Бросает ValueError, если массив не отсортирован по publisher.
+        """
+        if not self._is_sorted_asc(lambda b: b.publisher):
+            raise ValueError("Массив не отсортирован по полю 'publisher'")
+
+        lo, hi = 0, len(self._items) - 1
+        while lo <= hi:
+            mid = (lo + hi) // 2
+            val = self._items[mid].publisher
+            if val < publisher:
+                lo = mid + 1
+            elif val > publisher:
+                hi = mid - 1
+            else:
+                # идём к первому вхождению
+                while mid > 0 and self._items[mid - 1].publisher == publisher:
+                    mid -= 1
+                return mid
+        return -1
+    # endregion
