@@ -2,6 +2,7 @@ from typing import Iterable
 from typing import Any, Callable, Iterable
 
 from src.models.book import Book
+from .max_heap import MaxHeap
 
 
 class BookArray:
@@ -53,7 +54,7 @@ class BookArray:
         return result
 
     def sort_by_publisher(self) -> None:
-        """Сортировка слиянием по возрастанию поля publisher."""
+        """Сортировка слиянием по возрастанию поля publisher"""
         self._items = self.merge_sort(self._items, key=lambda b: b.publisher)
     # endregion
 
@@ -79,7 +80,7 @@ class BookArray:
         return list(reversed(output))
 
     def sort_by_isbn_desc(self) -> None:
-        """Сортировка подсчётом по убыванию поля isbn."""
+        """Сортировка подсчётом по убыванию поля isbn"""
         self._items = self.counting_sort_desc(
             self._items, key=lambda b: b.isbn)
     # endregion
@@ -100,49 +101,55 @@ class BookArray:
         return arr
 
     def sort_by_price(self) -> None:
-        """Сортировка вставками по возрастанию поля price."""
+        """Сортировка вставками по возрастанию поля price"""
         self._items = self.insertion_sort(self._items, key=lambda b: b.price)
     # endregion
 
     # region heap_sort: pages, по убыванию
-    @staticmethod
-    def _sift_down(items: list[Book], start: int, end: int,
-                   key: Callable[[Book], Any]) -> None:
-        root = start
-        while 2 * root + 1 <= end:
-            child = 2 * root + 1
-            swap = root
-            if key(items[swap]) < key(items[child]):
-                swap = child
-            if child + 1 <= end and key(items[swap]) < key(items[child + 1]):
-                swap = child + 1
-            if swap == root:
-                return
-            items[root], items[swap] = items[swap], items[root]
-            root = swap
+    # @staticmethod
+    # def _sift_down(items: list[Book], start: int, end: int,
+    #                key: Callable[[Book], Any]) -> None:
+    #     root = start
+    #     while 2 * root + 1 <= end:
+    #         child = 2 * root + 1
+    #         swap = root
+    #         if key(items[swap]) < key(items[child]):
+    #             swap = child
+    #         if child + 1 <= end and key(items[swap]) < key(items[child + 1]):
+    #             swap = child + 1
+    #         if swap == root:
+    #             return
+    #         items[root], items[swap] = items[swap], items[root]
+    #         root = swap
 
-    @staticmethod
-    def heap_sort(items: list[Book],
-                  key: Callable[[Book], Any]) -> list[Book]:
-        arr = list(items)
-        n = len(arr)
-        for start in range((n - 2) // 2, -1, -1):
-            BookArray._sift_down(arr, start, n - 1, key)
-        for end in range(n - 1, 0, -1):
-            arr[0], arr[end] = arr[end], arr[0]
-            BookArray._sift_down(arr, 0, end - 1, key)
-        return arr
+    # @staticmethod
+    # def heap_sort(items: list[Book],
+    #               key: Callable[[Book], Any]) -> list[Book]:
+    #     arr = list(items)
+    #     n = len(arr)
+    #     for start in range((n - 2) // 2, -1, -1):
+    #         BookArray._sift_down(arr, start, n - 1, key)
+    #     for end in range(n - 1, 0, -1):
+    #         arr[0], arr[end] = arr[end], arr[0]
+    #         BookArray._sift_down(arr, 0, end - 1, key)
+    #     return arr
+
+    # def sort_by_pages_desc(self) -> None:
+    #     """Сортировка кучей по убыванию поля pages"""
+    #     self._items = list(reversed(
+    #         self.heap_sort(self._items, key=lambda b: b.pages)
+    #     ))
 
     def sort_by_pages_desc(self) -> None:
-        """Сортировка кучей по убыванию поля pages."""
-        self._items = list(reversed(
-            self.heap_sort(self._items, key=lambda b: b.pages)
-        ))
+        """Сортировка кучей по убыванию поля pages через max-heap"""
+        heap = MaxHeap(key=lambda b: b.pages)
+        heap.build(self._items)
+        self._items = [heap.pop() for _ in range(len(heap))]
     # endregion
 
     # region jump_search по author
     def sort_by_author(self) -> None:
-        """Сортировка слиянием по возрастанию поля author (готовит данные под jump_search)."""
+        """Сортировка слиянием по возрастанию поля author (готовит данные под jump_search)"""
         self._items = self.merge_sort(self._items, key=lambda b: b.author)
 
     def _is_sorted_asc(self, key: Callable[[Book], Any]) -> bool:
@@ -180,7 +187,7 @@ class BookArray:
 
     # region binary_search по publisher
     def sort_by_publisher_asc(self) -> None:
-        """Сортировка слиянием по возрастанию поля publisher (готовит данные под binary_search)."""
+        """Сортировка слиянием по возрастанию поля publisher (готовит данные под binary_search)"""
         self._items = self.merge_sort(self._items, key=lambda b: b.publisher)
 
     def binary_search_by_publisher(self, publisher: str) -> int:
