@@ -66,18 +66,13 @@ class BookArray:
             return []
         keys = [key(b) for b in items]
         min_k, max_k = min(keys), max(keys)
-        size = max_k - min_k + 1
-        counts = [0] * size
-        for k in keys:
-            counts[k - min_k] += 1
-        for i in range(1, size):
-            counts[i] += counts[i - 1]
-        output: list[Book | None] = [None] * len(items)
-        for i in range(len(items) - 1, -1, -1):
-            k = keys[i] - min_k
-            output[counts[k] - 1] = items[i]
-            counts[k] -= 1
-        return list(reversed(output))
+        buckets: list[list[Book]] = [[] for _ in range(max_k - min_k + 1)]
+        for b in items:
+            buckets[key(b) - min_k].append(b)
+        output: list[Book] = []
+        for i in range(len(buckets) - 1, -1, -1):
+            output.extend(buckets[i])
+        return output
 
     def sort_by_isbn_desc(self) -> None:
         """Сортировка подсчётом по убыванию поля isbn"""
@@ -92,9 +87,8 @@ class BookArray:
         arr = list(items)
         for i in range(1, len(arr)):
             cur = arr[i]
-            cur_key = key(cur)
             j = i - 1
-            while j >= 0 and key(arr[j]) > cur_key:
+            while j >= 0 and key(arr[j]) > key(cur):
                 arr[j + 1] = arr[j]
                 j -= 1
             arr[j + 1] = cur
@@ -106,39 +100,6 @@ class BookArray:
     # endregion
 
     # region heap_sort: pages, по убыванию
-    # @staticmethod
-    # def _sift_down(items: list[Book], start: int, end: int,
-    #                key: Callable[[Book], Any]) -> None:
-    #     root = start
-    #     while 2 * root + 1 <= end:
-    #         child = 2 * root + 1
-    #         swap = root
-    #         if key(items[swap]) < key(items[child]):
-    #             swap = child
-    #         if child + 1 <= end and key(items[swap]) < key(items[child + 1]):
-    #             swap = child + 1
-    #         if swap == root:
-    #             return
-    #         items[root], items[swap] = items[swap], items[root]
-    #         root = swap
-
-    # @staticmethod
-    # def heap_sort(items: list[Book],
-    #               key: Callable[[Book], Any]) -> list[Book]:
-    #     arr = list(items)
-    #     n = len(arr)
-    #     for start in range((n - 2) // 2, -1, -1):
-    #         BookArray._sift_down(arr, start, n - 1, key)
-    #     for end in range(n - 1, 0, -1):
-    #         arr[0], arr[end] = arr[end], arr[0]
-    #         BookArray._sift_down(arr, 0, end - 1, key)
-    #     return arr
-
-    # def sort_by_pages_desc(self) -> None:
-    #     """Сортировка кучей по убыванию поля pages"""
-    #     self._items = list(reversed(
-    #         self.heap_sort(self._items, key=lambda b: b.pages)
-    #     ))
 
     def sort_by_pages_desc(self) -> None:
         """Сортировка кучей по убыванию поля pages через max-heap"""
@@ -148,6 +109,7 @@ class BookArray:
     # endregion
 
     # region jump_search по author
+
     def sort_by_author(self) -> None:
         """Сортировка слиянием по возрастанию поля author (готовит данные под jump_search)"""
         self._items = self.merge_sort(self._items, key=lambda b: b.author)
